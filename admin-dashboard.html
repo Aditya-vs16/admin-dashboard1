@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Social Admin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #020617;
+      --bg-soft: #020617;
+      --bg-card: #020617;
+      --bg-elevated: #050816;
+      --accent: #6366f1;
+      --accent-soft: rgba(99, 102, 241, 0.12);
+      --accent-strong: #4f46e5;
+      --danger: #f97373;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: rgba(148, 163, 184, 0.25);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.85);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 0% 0%, #1f2937 0, #020617 45%, #020617 100%);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px clamp(14px, 2.5vw, 24px) 32px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 18px;
+      min-height: 100vh;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .brand-badge {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 0%, #6366f1 0, #0f172a 40%, #020617 100%);
+      border: 1px solid rgba(129, 140, 248, 0.7);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    .brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-text span:first-child {
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .brand-text span:last-child {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .pill {
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--muted);
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(10px);
+      white-space: nowrap;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 320px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top left, rgba(15, 23, 42, 0.98), var(--bg-elevated));
+      box-shadow: var(--shadow-soft);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .panel-header {
+      padding: 12px 14px 8px;
+      border-bottom: 1px solid rgba(55, 65, 81, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-title {
+      font-size: 0.85rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .panel-badge {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(129, 140, 248, 0.7);
+      color: #a5b4fc;
+      background: var(--accent-soft);
+    }
+
+    .panel-body {
+      padding: 10px 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 0;
+    }
+
+    /* Users list */
+    .welcome {
+      font-size: 0.86rem;
+      color: var(--muted);
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.96);
+      border: 1px dashed rgba(148, 163, 184, 0.4);
+    }
+
+    .search-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .search-row input {
+      flex: 1;
+      padding: 7px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.8);
+      background: rgba(15, 23, 42, 0.96);
+      color: var(--text);
+      font-size: 0.82rem;
+      outline: none;
+    }
+
+    .search-row input::placeholder {
+      color: #6b7280;
+    }
+
+    .search-row button {
+      padding: 7px 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(129, 140, 248, 0.8);
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      color: white;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .search-row button:hover {
+      filter: brightness(1.03);
+    }
+
+    .user-list {
+      margin-top: 4px;
+      border-radius: 12px;
+      border: 1px solid rgba(31, 41, 55, 0.9);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.96), #020617);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 260px;
+      max-height: 480px;
+    }
+
+    .user-list-header {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1.3fr) minmax(0, 1fr);
+      column-gap: 8px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #6b7280;
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+      background: rgba(17, 24, 39, 0.96);
+    }
+
+    .user-list-body {
+      overflow: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #4b5563 transparent;
+    }
+
+    .user-row {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1.3fr) minmax(0, 1fr);
+      column-gap: 8px;
+      align-items: center;
+      font-size: 0.82rem;
+      padding: 7px 10px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.7);
+      transition: background 0.16s ease, transform 0.04s ease;
+    }
+
+    .user-row:last-child {
+      border-bottom: none;
+    }
+
+    .user-row:hover {
+      background: rgba(30, 64, 175, 0.22);
+    }
+
+    .user-row.active {
+      background: rgba(79, 70, 229, 0.35);
+      border-left: 2px solid #a5b4fc;
+      transform: translateX(-1px);
+    }
+
+    .user-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 0%, #6366f1 0, #0f172a 40%, #020617 100%);
+      border: 1px solid rgba(129, 140, 248, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      font-weight: 600;
+    }
+
+    .user-main {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-main span:first-child {
+      font-size: 0.85rem;
+    }
+
+    .user-main span:last-child {
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+
+    .user-meta {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    /* Posts panel */
+    .posts-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.85rem;
+    }
+
+    .crumb {
+      color: var(--muted);
+    }
+
+    .crumb strong {
+      color: #e5e7eb;
+    }
+
+    .pill-small {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: rgba(15, 23, 42, 0.96);
+    }
+
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .stat-chip {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.96);
+      color: #9ca3af;
+    }
+
+    .stat-chip strong {
+      color: #e5e7eb;
+    }
+
+    .posts-list {
+      margin-top: 4px;
+      border-radius: 14px;
+      border: 1px solid rgba(31, 41, 55, 0.95);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.98), #020617);
+      overflow: hidden;
+      min-height: 240px;
+      max-height: 480px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .posts-toolbar {
+      padding: 7px 10px;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.8rem;
+      background: rgba(17, 24, 39, 0.96);
+    }
+
+    .posts-filter {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .posts-filter input {
+      padding: 5px 7px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.8);
+      background: rgba(15, 23, 42, 0.98);
+      color: var(--text);
+      font-size: 0.78rem;
+      min-width: 120px;
+    }
+
+    .posts-filter input::placeholder {
+      color: #6b7280;
+    }
+
+    .posts-toolbar button {
+      padding: 5px 9px;
+      border-radius: 999px;
+      border: 1px solid rgba(129, 140, 248, 0.8);
+      background: transparent;
+      color: #c7d2fe;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+
+    .posts-toolbar button:hover {
+      background: rgba(79, 70, 229, 0.3);
+    }
+
+    .posts-scroll {
+      overflow: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #4b5563 transparent;
+    }
+
+    .post-item {
+      padding: 9px 11px;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.8);
+      font-size: 0.86rem;
+    }
+
+    .post-item:last-child {
+      border-bottom: none;
+    }
+
+    .post-title {
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .post-body {
+      color: #9ca3af;
+      font-size: 0.83rem;
+    }
+
+    .post-meta {
+      margin-top: 5px;
+      font-size: 0.75rem;
+      color: #6b7280;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .empty-state {
+      padding: 30px 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 2px solid rgba(148, 163, 184, 0.6);
+      border-top-color: #a5b4fc;
+      animation: spin 0.8s linear infinite;
+      margin-right: 6px;
+    }
+
+    .loading-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+    }
+
+    .error-text {
+      color: var(--danger);
+      font-size: 0.8rem;
+    }
+
+    footer {
+      font-size: 0.75rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-top: 1px solid rgba(31, 41, 55, 0.8);
+      padding-top: 10px;
+      margin-top: 4px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <div class="brand-badge">ADM</div>
+        <div class="brand-text">
+          <span>Social Admin</span>
+          <span>JSONPlaceholder User &amp; Post console</span>
+        </div>
+      </div>
+      <div class="pill">Welcome, new admin · Safe read‑only sandbox</div>
+    </header>
+
+    <main class="layout">
+      <!-- Users panel -->
+      <section class="panel" aria-label="User list">
+        <div class="panel-header">
+          <div class="panel-title">Users</div>
+          <div class="panel-badge" id="userCountBadge">Loading…</div>
+        </div>
+        <div class="panel-body">
+          <div class="welcome">
+            Start by choosing a user on the left. The right panel will instantly show all of their posts, powered by the JSONPlaceholder API.
+          </div>
+
+          <div class="search-row">
+            <input
+              type="text"
+              id="userSearch"
+              placeholder="Search by name, username, or email…"
+            />
+            <button type="button" id="reloadUsersBtn">Reload</button>
+          </div>
+
+          <div class="user-list" aria-live="polite">
+            <div class="user-list-header">
+              <div></div>
+              <div>Name</div>
+              <div>Username · Email</div>
+            </div>
+            <div class="user-list-body" id="userListBody">
+              <div class="empty-state">
+                <span class="loading-row">
+                  <span class="spinner"></span>
+                  <span>Fetching users from jsonplaceholder.typicode.com…</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div id="userError" class="error-text" style="display:none;"></div>
+        </div>
+      </section>
+
+      <!-- Posts panel -->
+      <section class="panel" aria-label="Posts view">
+        <div class="panel-header">
+          <div class="panel-title">Posts</div>
+          <div class="panel-badge">Read‑only demo</div>
+        </div>
+        <div class="panel-body">
+          <div class="posts-header">
+            <div class="crumb" id="crumb">
+              Select a user to view their posts.
+            </div>
+            <div class="pill-small" id="postsInfo">0 posts loaded</div>
+          </div>
+
+          <div class="stats-row">
+            <div class="stat-chip">
+              API: <strong>https://jsonplaceholder.typicode.com</strong>
+            </div>
+            <div class="stat-chip">
+              Users: <strong>GET /users</strong> · Posts: <strong>GET /posts?userId=ID</strong>
+            </div>
+          </div>
+
+          <div class="posts-list">
+            <div class="posts-toolbar">
+              <div class="posts-filter">
+                <span>Filter:</span>
+                <input
+                  type="text"
+                  id="postFilter"
+                  placeholder="Search in titles…"
+                  disabled
+                />
+              </div>
+              <button type="button" id="clearSelectionBtn">Clear selection</button>
+            </div>
+            <div class="posts-scroll" id="postsBody">
+              <div class="empty-state">
+                Choose a user from the left to see their posts here.
+              </div>
+            </div>
+          </div>
+          <div id="postsError" class="error-text" style="display:none;"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div>
+        Built for admin onboarding: gentle UI, clear states, and safe fake data only (JSONPlaceholder).
+      </div>
+      <div>
+        Note: Network errors or CORS policies can affect live API calls in some environments.[web:51][web:55][web:61]
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const API_BASE = "https://jsonplaceholder.typicode.com"; // users & posts endpoints.[web:51][web:56]
+
+    const userListBody = document.getElementById("userListBody");
+    const userSearch = document.getElementById("userSearch");
+    const reloadUsersBtn = document.getElementById("reloadUsersBtn");
+    const userError = document.getElementById("userError");
+    const userCountBadge = document.getElementById("userCountBadge");
+
+    const postsBody = document.getElementById("postsBody");
+    const postsError = document.getElementById("postsError");
+    const postsInfo = document.getElementById("postsInfo");
+    const crumb = document.getElementById("crumb");
+    const postFilter = document.getElementById("postFilter");
+    const clearSelectionBtn = document.getElementById("clearSelectionBtn");
+
+    let allUsers = [];
+    let filteredUsers = [];
+    let selectedUserId = null;
+    let allPostsForUser = [];
+
+    function setUserLoading() {
+      userListBody.innerHTML =
+        '<div class="empty-state"><span class="loading-row"><span class="spinner"></span><span>Loading users…</span></span></div>';
+      userCountBadge.textContent = "Loading…";
+      userError.style.display = "none";
+    }
+
+    function setPostsLoading() {
+      postsBody.innerHTML =
+        '<div class="empty-state"><span class="loading-row"><span class="spinner"></span><span>Loading posts for this user…</span></span></div>';
+      postsError.style.display = "none";
+      postsInfo.textContent = "Loading…";
+    }
+
+    async function fetchUsers() {
+      try {
+        setUserLoading();
+        const res = await fetch(API_BASE + "/users"); // GET /users.[web:51][web:56]
+        if (!res.ok) throw new Error("Failed to fetch users");
+        const data = await res.json();
+        allUsers = data;
+        filteredUsers = data;
+        renderUsers();
+        userCountBadge.textContent = data.length + " users";
+      } catch (e) {
+        userListBody.innerHTML =
+          '<div class="empty-state">Could not load users. Please try again.</div>';
+        userError.textContent = e.message;
+        userError.style.display = "block";
+        userCountBadge.textContent = "Error";
+      }
+    }
+
+    function renderUsers() {
+      if (!filteredUsers.length) {
+        userListBody.innerHTML =
+          '<div class="empty-state">No users match this search.</div>';
+        return;
+      }
+      userListBody.innerHTML = "";
+      filteredUsers.forEach((u) => {
+        const row = document.createElement("div");
+        row.className = "user-row";
+        if (u.id === selectedUserId) row.classList.add("active");
+        row.dataset.id = u.id;
+
+        const initials = (u.name || "?")
+          .split(" ")
+          .map((p) => p[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase();
+
+        row.innerHTML = `
+          <div class="user-avatar">${initials}</div>
+          <div class="user-main">
+            <span>${u.name}</span>
+            <span>@${u.username}</span>
+          </div>
+          <div class="user-meta">
+            <div>${u.email}</div>
+            <div>${u.company?.name || ""}</div>
+          </div>
+        `;
+        row.addEventListener("click", () => onSelectUser(u));
+        userListBody.appendChild(row);
+      });
+    }
+
+    async function onSelectUser(user) {
+      selectedUserId = user.id;
+      allPostsForUser = [];
+      updateUserSelectionUI();
+      crumb.innerHTML =
+        'Viewing posts for <strong>' +
+        user.name +
+        "</strong> (@ " +
+        user.username +
+        ")";
+      setPostsLoading();
+      postFilter.disabled = false;
+      postFilter.value = "";
+      try {
+        const res = await fetch(
+          API_BASE + "/posts?userId=" + encodeURIComponent(user.id)
+        ); // GET /posts?userId=ID.[web:51][web:53]
+        if (!res.ok) throw new Error("Failed to fetch posts");
+        const posts = await res.json();
+        allPostsForUser = posts;
+        renderPosts(posts);
+        postsInfo.textContent = posts.length + " posts loaded";
+      } catch (e) {
+        postsBody.innerHTML =
+          '<div class="empty-state">Could not load posts for this user.</div>';
+        postsError.textContent = e.message;
+        postsError.style.display = "block";
+        postsInfo.textContent = "Error";
+      }
+    }
+
+    function updateUserSelectionUI() {
+      document
+        .querySelectorAll(".user-row")
+        .forEach((row) => row.classList.remove("active"));
+      if (selectedUserId != null) {
+        const active = document.querySelector(
+          '.user-row[data-id="' + selectedUserId + '"]'
+        );
+        if (active) active.classList.add("active");
+      }
+    }
+
+    function renderPosts(posts) {
+      if (!posts.length) {
+        postsBody.innerHTML =
+          '<div class="empty-state">This user has no posts in the dataset.</div>';
+        return;
+      }
+      postsBody.innerHTML = "";
+      posts.forEach((p) => {
+        const item = document.createElement("article");
+        item.className = "post-item";
+        item.innerHTML = `
+          <div class="post-title">${escapeHtml(p.title)}</div>
+          <div class="post-body">${escapeHtml(p.body)}</div>
+          <div class="post-meta">
+            <span>Post ID: #${p.id}</span>
+            <span>User ID: ${p.userId}</span>
+          </div>
+        `;
+        postsBody.appendChild(item);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    // Search users
+    userSearch.addEventListener("input", () => {
+      const q = userSearch.value.trim().toLowerCase();
+      if (!q) {
+        filteredUsers = allUsers.slice();
+      } else {
+        filteredUsers = allUsers.filter((u) => {
+          return (
+            u.name.toLowerCase().includes(q) ||
+            u.username.toLowerCase().includes(q) ||
+            u.email.toLowerCase().includes(q)
+          );
+        });
+      }
+      renderUsers();
+    });
+
+    reloadUsersBtn.addEventListener("click", () => {
+      selectedUserId = null;
+      allPostsForUser = [];
+      crumb.textContent = "Select a user to view their posts.";
+      postsBody.innerHTML =
+        '<div class="empty-state">Choose a user from the left to see their posts here.</div>';
+      postsInfo.textContent = "0 posts loaded";
+      postFilter.value = "";
+      postFilter.disabled = true;
+      fetchUsers();
+    });
+
+    // Filter posts by title
+    postFilter.addEventListener("input", () => {
+      const q = postFilter.value.trim().toLowerCase();
+      if (!q) {
+        renderPosts(allPostsForUser);
+        postsInfo.textContent = allPostsForUser.length + " posts loaded";
+      } else {
+        const filtered = allPostsForUser.filter((p) =>
+          p.title.toLowerCase().includes(q)
+        );
+        renderPosts(filtered);
+        postsInfo.textContent =
+          filtered.length +
+          " / " +
+          allPostsForUser.length +
+          " posts match filter";
+      }
+    });
+
+    clearSelectionBtn.addEventListener("click", () => {
+      selectedUserId = null;
+      allPostsForUser = [];
+      updateUserSelectionUI();
+      crumb.textContent = "Select a user to view their posts.";
+      postsBody.innerHTML =
+        '<div class="empty-state">Choose a user from the left to see their posts here.</div>';
+      postsInfo.textContent = "0 posts loaded";
+      postFilter.value = "";
+      postFilter.disabled = true;
+    });
+
+    // Initial load
+    fetchUsers();
+  </script>
+</body>
+</html>
